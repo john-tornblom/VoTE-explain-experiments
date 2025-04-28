@@ -1,0 +1,12 @@
+explain:dataset:    inputs/wdbc.csv
+explain:instance:   178
+explain:timeout:    3600s
+explain:type:       enumeration (MARCO)
+explain:nb_inputs:  30
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   462
+explain:outcome:    11026 explanations
+explain:runtime:    19.07s
+explain:querytime:  18.01s
+explain:queries:    314830

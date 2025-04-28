@@ -1,0 +1,12 @@
+explain:dataset:    inputs/sonar.csv
+explain:instance:   92
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  60
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   436
+explain:outcome:    timeout
+explain:runtime:    3589.31s
+explain:querytime:  3466.01s
+explain:queries:    66971250

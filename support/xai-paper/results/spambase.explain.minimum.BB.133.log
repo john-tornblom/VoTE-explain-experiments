@@ -1,0 +1,12 @@
+explain:dataset:    inputs/spambase.csv
+explain:instance:   133
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  57
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   948
+explain:outcome:    timeout
+explain:runtime:    3588.94s
+explain:querytime:  3547.31s
+explain:queries:    19180281

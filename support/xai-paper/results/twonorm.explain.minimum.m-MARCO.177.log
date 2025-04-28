@@ -1,0 +1,8 @@
+explain:model:    inputs/twonorm.json
+explain:dataset:  inputs/twonorm.csv
+explain:instance: 177
+explain:timeout:  3600
+explain:outcome:  [0, 1, 2, 3, 4, 6, 7, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19] (18)
+explain:queries:  97
+explain:runtime:  0.005770999999999998
+explain:seeds:    21

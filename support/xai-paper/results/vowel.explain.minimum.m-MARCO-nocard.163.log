@@ -1,0 +1,8 @@
+explain:model:    inputs/vowel.json
+explain:dataset:  inputs/vowel.csv
+explain:instance: 163
+explain:timeout:  3600
+explain:outcome:  [3, 4, 6, 8, 9] (5)
+explain:queries:  160
+explain:runtime:  0.312103
+explain:seeds:    36

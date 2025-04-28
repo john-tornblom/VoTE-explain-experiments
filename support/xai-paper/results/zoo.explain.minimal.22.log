@@ -1,0 +1,10 @@
+explain:dataset:    inputs/zoo.csv
+explain:instance:   22
+explain:timeout:    3600s
+explain:type:       minimal (deletion filter)
+explain:nb_inputs:  16
+explain:nb_outputs: 7
+explain:nb_trees:   350
+explain:nb_nodes:   906
+explain:outcome:    {3, 13, 15}
+explain:runtime:    0.00s

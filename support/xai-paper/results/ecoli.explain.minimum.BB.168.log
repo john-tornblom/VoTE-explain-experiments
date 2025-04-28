@@ -1,0 +1,12 @@
+explain:dataset:    inputs/ecoli.csv
+explain:instance:   168
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  7
+explain:nb_outputs: 5
+explain:nb_trees:   250
+explain:nb_nodes:   2370
+explain:outcome:    |{0, 1, 5}| = 3
+explain:runtime:    0.05s
+explain:querytime:  0.05s
+explain:queries:    42

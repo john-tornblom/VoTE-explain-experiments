@@ -1,0 +1,12 @@
+explain:dataset:    inputs/zoo.csv
+explain:instance:   23
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  16
+explain:nb_outputs: 7
+explain:nb_trees:   350
+explain:nb_nodes:   906
+explain:outcome:    |{0, 1, 3, 5, 8, 9, 11, 12}| = 8
+explain:runtime:    1492.10s
+explain:querytime:  1481.12s
+explain:queries:    10092705

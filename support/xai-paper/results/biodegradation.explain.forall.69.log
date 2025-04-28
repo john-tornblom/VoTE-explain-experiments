@@ -1,0 +1,12 @@
+explain:dataset:    inputs/biodegradation.csv
+explain:instance:   69
+explain:timeout:    3600s
+explain:type:       enumeration (MARCO)
+explain:nb_inputs:  41
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   646
+explain:outcome:    81391 explanations
+explain:runtime:    481.22s
+explain:querytime:  423.37s
+explain:queries:    3492265

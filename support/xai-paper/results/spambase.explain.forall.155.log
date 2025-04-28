@@ -1,0 +1,12 @@
+explain:dataset:    inputs/spambase.csv
+explain:instance:   155
+explain:timeout:    3600s
+explain:type:       enumeration (MARCO)
+explain:nb_inputs:  57
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   948
+explain:outcome:    61400 explanations
+explain:runtime:    2567.20s
+explain:querytime:  2539.48s
+explain:queries:    2914369

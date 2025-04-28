@@ -1,0 +1,8 @@
+explain:model:    inputs/segmentation.json
+explain:dataset:  inputs/segmentation.csv
+explain:instance: 82
+explain:timeout:  3600
+explain:outcome:  [1, 9, 15, 18] (4)
+explain:queries:  82
+explain:runtime:  0.037896999999999986
+explain:seeds:    12

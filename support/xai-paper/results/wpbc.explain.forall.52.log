@@ -1,0 +1,12 @@
+explain:dataset:    inputs/wpbc.csv
+explain:instance:   52
+explain:timeout:    3600s
+explain:type:       enumeration (MARCO)
+explain:nb_inputs:  33
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   564
+explain:outcome:    52101 explanations
+explain:runtime:    389.63s
+explain:querytime:  374.67s
+explain:queries:    1466563

@@ -1,0 +1,12 @@
+explain:dataset:    inputs/vowel.csv
+explain:instance:   141
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  13
+explain:nb_outputs: 11
+explain:nb_trees:   550
+explain:nb_nodes:   7534
+explain:outcome:    timeout
+explain:runtime:    3587.18s
+explain:querytime:  3585.18s
+explain:queries:    1582939

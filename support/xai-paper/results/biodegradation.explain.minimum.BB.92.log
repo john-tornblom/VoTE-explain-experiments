@@ -1,0 +1,12 @@
+explain:dataset:    inputs/biodegradation.csv
+explain:instance:   92
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  41
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   646
+explain:outcome:    timeout
+explain:runtime:    3588.76s
+explain:querytime:  3513.13s
+explain:queries:    49839283

@@ -1,0 +1,10 @@
+explain:dataset:    inputs/ionosphere.csv
+explain:instance:   25
+explain:timeout:    3600s
+explain:type:       minimal (deletion filter)
+explain:nb_inputs:  34
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   464
+explain:outcome:    {5, 6, 10, 14, 15, 17, 20, 21, 23, 26, 30}
+explain:runtime:    0.00s

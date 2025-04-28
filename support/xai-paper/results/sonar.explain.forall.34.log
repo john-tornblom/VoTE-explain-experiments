@@ -1,0 +1,12 @@
+explain:dataset:    inputs/sonar.csv
+explain:instance:   34
+explain:timeout:    3600s
+explain:type:       enumeration (MARCO)
+explain:nb_inputs:  60
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   436
+explain:outcome:    29104 explanations
+explain:runtime:    122.73s
+explain:querytime:  110.36s
+explain:queries:    1555009

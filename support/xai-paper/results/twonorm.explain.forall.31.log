@@ -1,0 +1,12 @@
+explain:dataset:    inputs/twonorm.csv
+explain:instance:   31
+explain:timeout:    3600s
+explain:type:       enumeration (MARCO)
+explain:nb_inputs:  20
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   742
+explain:outcome:    403 explanations
+explain:runtime:    1.64s
+explain:querytime:  1.62s
+explain:queries:    10580

@@ -1,0 +1,12 @@
+explain:dataset:    inputs/ionosphere.csv
+explain:instance:   103
+explain:timeout:    3600s
+explain:type:       enumeration (MARCO)
+explain:nb_inputs:  34
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   464
+explain:outcome:    235756 explanations
+explain:runtime:    798.40s
+explain:querytime:  513.10s
+explain:queries:    8179225

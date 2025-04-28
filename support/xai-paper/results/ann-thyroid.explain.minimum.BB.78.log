@@ -1,0 +1,12 @@
+explain:dataset:    inputs/ann-thyroid.csv
+explain:instance:   78
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  21
+explain:nb_outputs: 3
+explain:nb_trees:   150
+explain:nb_nodes:   1302
+explain:outcome:    |{2, 7, 16, 17, 18, 20}| = 6
+explain:runtime:    229.11s
+explain:querytime:  228.93s
+explain:queries:    155998

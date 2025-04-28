@@ -1,0 +1,9 @@
+MINIMAL:
+  solved: 1.00 
+  time:   0.02 hours
+MINIMUM:
+  solved: 1.00 
+  time:   19.07 hours
+ENUMERATE:
+  solved: 0.89 
+  time:   510.79 hours

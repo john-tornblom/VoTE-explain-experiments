@@ -1,0 +1,10 @@
+explain:dataset:    inputs/sonar.csv
+explain:instance:   135
+explain:timeout:    3600s
+explain:type:       minimal (deletion filter)
+explain:nb_inputs:  60
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   436
+explain:outcome:    {10, 11, 15, 19, 26, 30, 31, 33, 35, 37, 40, 41, 44, 45, 47, 51, 52, 54, 56}
+explain:runtime:    0.00s

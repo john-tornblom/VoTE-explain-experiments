@@ -1,0 +1,12 @@
+explain:dataset:    inputs/segmentation.csv
+explain:instance:   170
+explain:timeout:    3600s
+explain:type:       enumeration (MARCO)
+explain:nb_inputs:  19
+explain:nb_outputs: 7
+explain:nb_trees:   350
+explain:nb_nodes:   1550
+explain:outcome:    229 explanations
+explain:runtime:    5.63s
+explain:querytime:  5.62s
+explain:queries:    4642

@@ -1,0 +1,12 @@
+explain:dataset:    inputs/vowel.csv
+explain:instance:   11
+explain:timeout:    3600s
+explain:type:       enumeration (MARCO)
+explain:nb_inputs:  13
+explain:nb_outputs: 11
+explain:nb_trees:   550
+explain:nb_nodes:   7534
+explain:outcome:    13 explanations
+explain:runtime:    1.02s
+explain:querytime:  1.02s
+explain:queries:    239

@@ -1,0 +1,10 @@
+explain:dataset:    inputs/segmentation.csv
+explain:instance:   183
+explain:timeout:    3600s
+explain:type:       minimal (deletion filter)
+explain:nb_inputs:  19
+explain:nb_outputs: 7
+explain:nb_trees:   350
+explain:nb_nodes:   1550
+explain:outcome:    {7, 9, 10, 11, 12, 13, 15, 17, 18}
+explain:runtime:    0.03s

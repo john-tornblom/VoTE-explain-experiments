@@ -1,0 +1,10 @@
+explain:dataset:    inputs/ann-thyroid.csv
+explain:instance:   16
+explain:timeout:    3600s
+explain:type:       minimal (deletion filter)
+explain:nb_inputs:  21
+explain:nb_outputs: 3
+explain:nb_trees:   150
+explain:nb_nodes:   1302
+explain:outcome:    {16}
+explain:runtime:    0.00s

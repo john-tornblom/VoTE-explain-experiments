@@ -1,0 +1,8 @@
+explain:model:    inputs/ecoli.json
+explain:dataset:  inputs/ecoli.csv
+explain:instance: 172
+explain:timeout:  3600
+explain:outcome:  [1, 4, 5] (3)
+explain:queries:  29
+explain:runtime:  0.031859
+explain:seeds:    7

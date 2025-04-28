@@ -1,0 +1,8 @@
+explain:model:    inputs/promoters.json
+explain:dataset:  inputs/promoters.csv
+explain:instance: 101
+explain:timeout:  3600
+explain:outcome:  [0] (1)
+explain:queries:  3
+explain:runtime:  0.00042399999999997995
+explain:seeds:    3

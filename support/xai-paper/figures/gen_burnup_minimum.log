@@ -1,0 +1,9 @@
+m-MARCO:
+  solved: 99.97 % 
+  time:   19.07 hours
+m-MARCO(bias):
+  solved: 99.71 % 
+  time:   60.07 hours
+m-MARCO(nocard):
+  solved: 99.52 % 
+  time:   72.19 hours

@@ -1,0 +1,12 @@
+explain:dataset:    inputs/pendigits.csv
+explain:instance:   14
+explain:timeout:    3600s
+explain:type:       enumeration (MARCO)
+explain:nb_inputs:  16
+explain:nb_outputs: 10
+explain:nb_trees:   500
+explain:nb_nodes:   6590
+explain:outcome:    188 explanations
+explain:runtime:    20.43s
+explain:querytime:  20.42s
+explain:queries:    3359

@@ -1,0 +1,8 @@
+explain:model:    inputs/sonar.json
+explain:dataset:  inputs/sonar.csv
+explain:instance: 20
+explain:timeout:  3600
+explain:outcome:  [3, 11, 14, 19, 20, 22, 25, 47, 54, 57, 58] (11)
+explain:queries:  2513576
+explain:runtime:  237.89997400000001
+explain:seeds:    61708

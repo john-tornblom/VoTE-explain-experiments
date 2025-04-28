@@ -1,0 +1,8 @@
+explain:model:    inputs/shuttle.json
+explain:dataset:  inputs/shuttle.csv
+explain:instance: 167
+explain:timeout:  3600
+explain:outcome:  [0, 1, 6, 8] (4)
+explain:queries:  35
+explain:runtime:  0.026776999999999995
+explain:seeds:    6

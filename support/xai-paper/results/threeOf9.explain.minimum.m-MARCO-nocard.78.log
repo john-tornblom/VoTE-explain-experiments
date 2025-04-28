@@ -1,0 +1,8 @@
+explain:model:    inputs/threeOf9.json
+explain:dataset:  inputs/threeOf9.csv
+explain:instance: 78
+explain:timeout:  3600
+explain:outcome:  [0] (1)
+explain:queries:  5
+explain:runtime:  0.00023999999999999022
+explain:seeds:    3

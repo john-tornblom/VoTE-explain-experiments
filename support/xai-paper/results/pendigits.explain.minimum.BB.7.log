@@ -1,0 +1,12 @@
+explain:dataset:    inputs/pendigits.csv
+explain:instance:   7
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  16
+explain:nb_outputs: 10
+explain:nb_trees:   500
+explain:nb_nodes:   6590
+explain:outcome:    timeout
+explain:runtime:    3586.43s
+explain:querytime:  3584.50s
+explain:queries:    1617585

@@ -1,0 +1,8 @@
+explain:model:    inputs/wine-recognition.json
+explain:dataset:  inputs/wine-recognition.csv
+explain:instance: 125
+explain:timeout:  3600
+explain:outcome:  [6, 9] (2)
+explain:queries:  26
+explain:runtime:  0.0037810000000000066
+explain:seeds:    4

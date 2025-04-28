@@ -1,0 +1,12 @@
+explain:dataset:    inputs/texture.csv
+explain:instance:   84
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  40
+explain:nb_outputs: 11
+explain:nb_trees:   550
+explain:nb_nodes:   5630
+explain:outcome:    timeout
+explain:runtime:    3588.26s
+explain:querytime:  3585.56s
+explain:queries:    1535521

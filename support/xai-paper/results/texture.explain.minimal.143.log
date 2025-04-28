@@ -1,0 +1,10 @@
+explain:dataset:    inputs/texture.csv
+explain:instance:   143
+explain:timeout:    3600s
+explain:type:       minimal (deletion filter)
+explain:nb_inputs:  40
+explain:nb_outputs: 11
+explain:nb_trees:   550
+explain:nb_nodes:   5630
+explain:outcome:    {2, 5, 7, 9, 19, 22, 23, 25, 26, 29, 32, 33, 35, 39}
+explain:runtime:    0.06s

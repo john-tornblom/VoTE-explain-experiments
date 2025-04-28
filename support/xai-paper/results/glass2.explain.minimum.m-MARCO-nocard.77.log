@@ -1,0 +1,8 @@
+explain:model:    inputs/glass2.json
+explain:dataset:  inputs/glass2.csv
+explain:instance: 77
+explain:timeout:  3600
+explain:outcome:  [0, 2] (2)
+explain:queries:  32
+explain:runtime:  0.003945000000000004
+explain:seeds:    8

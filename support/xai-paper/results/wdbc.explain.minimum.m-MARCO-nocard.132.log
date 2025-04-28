@@ -1,0 +1,8 @@
+explain:model:    inputs/wdbc.json
+explain:dataset:  inputs/wdbc.csv
+explain:instance: 132
+explain:timeout:  3600
+explain:outcome:  [5, 7, 13, 20, 22, 24, 26, 27] (8)
+explain:queries:  7204
+explain:runtime:  0.37589399999999995
+explain:seeds:    1002

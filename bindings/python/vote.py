@@ -1,0 +1,507 @@
+# encoding: utf-8
+# Copyright (C) 2018 John Törnblom
+#
+# This file is part of VoTE (Verifier of Tree Ensembles).
+#
+# VoTE is free software: you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation, either version 3 of the License, or (at your option) any
+# later version.
+#
+# VoTE is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+# for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with VoTE; see the files COPYING and COPYING.LESSER. If not,
+# see <http://www.gnu.org/licenses/>.
+'''
+VoTE (Verifier of Tree Ensembles) is a toolsuite for analyzing input/output
+mappings of decision trees and tree ensembles.
+'''
+import collections
+import json
+import os
+import tempfile
+
+from _vote import ffi as _ffi
+from _vote import lib as _lib
+
+
+__version__ = _ffi.string(_lib.vote_version())
+
+UNSURE = -1
+FAIL = 0
+PASS = 1
+
+
+try: import numpy as np
+except: pass
+
+
+def argmax(iterable):
+    '''
+    Returns the index of the largest value in an *iterable* of numbers.
+    '''
+    fvec = [float(el) for el in iterable]
+    return _lib.vote_argmax(fvec, len(fvec))
+
+
+def argmin(iterable):
+    '''
+    Returns the index of the smallest value in an *iterable* of numbers.
+    '''
+    fvec = [float(el) for el in iterable]
+    return _lib.vote_argmin(fvec, len(fvec))
+
+
+def mapping_precise(mapping):
+    '''
+    Check if a *mapping* is precise, i.e. the output is a single point.
+    '''
+    return _lib.vote_mapping_precise(mapping)
+
+
+def mapping_argmax(mapping):
+    '''
+    Returns the index of the largest output value in a *mapping*.
+    '''
+    return _lib.vote_mapping_argmax(mapping)
+
+
+def mapping_check_argmax(mapping, expected):
+    '''
+    Check if the argmax of a *mapping* is as *expected*.
+    '''
+    return _lib.vote_mapping_check_argmax(mapping, expected)
+
+
+def mapping_argmin(mapping):
+    '''
+    Returns the index of the smallest output value in a *mapping*.
+    '''
+    return _lib.vote_mapping_argmin(mapping)
+
+
+def mapping_check_argmin(mapping, expected):
+    '''
+    Check if the argmin of a *mapping* is as *expected*.
+    '''
+    return _lib.vote_mapping_check_argmin(mapping, expected)
+
+
+def mapping_new(input_dim, output_dim):
+    '''
+    Create a new mapping with the given input/output dimensions. Input bounds
+    are initialized to [-∞, ∞], and output bounds are initialized to [0, 0].
+    '''
+    mapping = _lib.vote_mapping_new(int(input_dim), int(output_dim))
+    return _ffi.gc(mapping, _lib.vote_mapping_del)
+
+
+def mapping_copy(mapping):
+    '''
+    Create a (deep) copy of a mapping.
+    '''
+    mapping = _lib.vote_mapping_copy(mapping)
+    return _ffi.gc(mapping, _lib.vote_mapping_del)
+
+
+@_ffi.def_extern()
+def _vote_mapping_python_cb(ctx, mapping):
+    '''
+    Callback hook from VoTE Core forall/absref iterations.
+    '''
+    callback = _ffi.from_handle(ctx)
+    mapping = mapping_copy(mapping)
+    return callback(mapping)
+
+
+@_ffi.def_extern()
+def _vote_explain_python_cb(ctx, evec, size):
+    '''
+    Callback hook from VoTE Core explain iterations.
+    '''
+    callback = _ffi.from_handle(ctx)
+    return callback([ind for ind in range(size) if evec[ind]])
+
+
+def _mk_bounds(dims, limits=None):
+    '''
+    Create an array of bounds with length *dims*, and initialize the bounds with
+    *limits*, i.e. a list of pairs with the lower and upper limit
+    in each dimension, e.g. [(0, 1), (0, 1)].
+    '''
+    limits = limits or list()
+    bounds = _ffi.new('vote_bound_t[%d]' % dims)
+    for ind in range(dims):
+        bounds[ind].lower = -float('inf')
+        bounds[ind].upper = float('inf')
+
+    for ind, limit in enumerate(limits):
+        bounds[ind].lower = limit[0]
+        bounds[ind].upper = limit[1]
+
+    return bounds
+
+
+def _sklearn_dt_to_dict(tree):
+    '''
+    Convert a sklearn decision tree into a dictionary.
+    '''
+    if tree._estimator_type == 'classifier':
+        nb_outputs = tree.n_classes_
+        normalize = True
+        value = np.squeeze(tree.tree_.value)
+    else:
+        nb_outputs = tree.n_outputs_
+        normalize = False
+        value = np.squeeze(tree.tree_.value)
+        if len(value.shape) == 1:
+            value = value.reshape((len(value), 1))
+
+    return dict(nb_inputs=tree.tree_.n_features,
+                nb_outputs=nb_outputs,
+                left=tree.tree_.children_left,
+                right=tree.tree_.children_right,
+                feature=tree.tree_.feature,
+                threshold=tree.tree_.threshold,
+                normalize=normalize,
+                value=value)
+
+
+def _sklearn_rf_to_dict(inst):
+    '''
+    Convert a sklearn random forest into a dictionary.
+    '''
+    return dict(trees=[_sklearn_dt_to_dict(tree)
+                       for tree in inst.estimators_],
+                post_process='divisor')
+
+
+def _catboost_gb_to_dict(inst):
+    '''
+    Convert a CatBoost model into a dictionary.
+    '''
+    filename = tempfile.mktemp()
+    inst.save_model(filename, format='json')
+    with open(filename, 'r') as f:
+        cb = json.load(f)
+
+    os.remove(filename)
+
+    nb_inputs = len(cb['features_info']['float_features'])
+    nb_classes = 0
+    
+    if inst._estimator_type == 'classifier':
+        post_process = 'softmax'
+        cls_params = (cb['model_info'].get('class_params', None) or
+                      cb['model_info'].get('multiclass_params', None))
+        nb_classes = len(cls_params['class_names'])
+        
+    elif inst._estimator_type == 'regressor':
+        post_process = 'none'
+
+    else:
+        raise NotImplementedError
+
+    scale, biases = cb['scale_and_bias']
+    tree_obj_list = list()
+    for tree in cb['oblivious_trees']:
+        tree_obj = dict()
+        
+        nb_splits = len(tree['splits'])
+        depth = nb_splits + 1
+        nb_nodes = (2 ** depth) - 1
+        nb_leaves = len(tree['leaf_values'])
+        nb_outputs = nb_leaves // (2 ** nb_splits)
+
+        if not isinstance(biases, list):
+            biases = [biases] * nb_outputs
+        
+        tree_obj['nb_inputs'] = nb_inputs
+        tree_obj['nb_outputs'] = nb_outputs
+        tree_obj['left'] = [-1] * nb_nodes
+        tree_obj['right'] = [-1] * nb_nodes
+        tree_obj['feature'] = [-1] * nb_nodes
+        tree_obj['threshold'] = [None] * nb_nodes
+        tree_obj['value'] = [[None] * nb_outputs] * nb_nodes
+        tree_obj['left'][0:nb_nodes//2] = [ind for ind in range(2, nb_nodes, 2)
+                                          if ind % 2 == 0]
+        tree_obj['right'][0:nb_nodes//2] = [ind for ind in range(1, nb_nodes, 2)
+                                           if ind % 2 == 1]
+
+        splits = list(reversed(tree['splits']))
+        for node_id in range(2 ** nb_splits - 1):
+            d = int(np.log2(node_id + 1))
+            tree_obj['feature'][node_id] = splits[d]['float_feature_index']
+            tree_obj['threshold'][node_id] = np.float32(splits[d]['border'])
+
+        queue = collections.deque(tree['leaf_values'])
+        for node_id in range(2 ** nb_splits - 1, nb_nodes):
+            values = reversed([queue.pop() for _ in range(nb_outputs)])
+            tree_obj['value'][node_id] = [(val * scale) + bias
+                                          for val, bias in zip(values, biases)]
+
+        tree_obj_list.append(tree_obj)
+
+        scale = 1
+        biases = [0] * nb_outputs
+    
+    return dict(trees=tree_obj_list,
+                post_process=post_process)
+
+
+class _NumPyJSONEncoder(json.JSONEncoder):
+    def default(self, obj):
+        ty = type(obj)
+        
+        if issubclass(ty, np.ndarray):
+            return obj.tolist()
+        elif issubclass(ty, np.float64):
+            return float(obj)
+        elif issubclass(ty, np.float32):
+            return float(obj)
+        elif issubclass(ty, np.integer):
+            return int(obj)
+        else:
+            return json.JSONEncoder.default(self, obj)
+
+
+class Ensemble:
+    '''
+    An ensemble is a collection of trees that captures statistical properties 
+    of a system-of-intrest.
+    '''
+    
+    ptr = None
+
+    def __init__(self, ptr):
+        '''
+        Initialize a Python object that wraps arround a pointer to a VoTE Core
+        vote_ensemble_t data structure.
+        '''
+        self.ptr = ptr
+        assert self.ptr
+        
+    def __del__(self):
+        '''
+        Free the memory pointed to by *self.ptr*.
+        '''
+        if _lib and self.ptr:
+            _lib.vote_ensemble_del(self.ptr)
+
+    @classmethod
+    def from_file(cls, filename):
+        '''
+        Load a VoTE ensemble from disk persisted in a JSON-based format.
+        '''
+        ptr = _lib.vote_ensemble_load_file(filename.encode('utf8'))
+        return cls(ptr)
+    
+    @classmethod
+    def from_string(cls, string):
+        '''
+        Load a VoTE ensemble from a a JSON-based formated *string*.
+        '''
+        ptr = _lib.vote_ensemble_load_string(string.encode('utf8'))
+        return cls(ptr)
+
+    @classmethod
+    def from_sklearn(cls, instance):
+        '''
+        Convert an sklearn model *instance* into a VoTE ensemble.
+        '''
+        conv = {
+            'RandomForestClassifier': _sklearn_rf_to_dict,
+            'RandomForestRegressor': _sklearn_rf_to_dict,
+        }
+        name = type(instance).__name__
+        if name not in conv:
+            raise NotImplementedError
+        
+        d = conv[name](instance)
+        return cls.from_string(json.dumps(d, cls=_NumPyJSONEncoder))
+
+    @classmethod
+    def from_catboost(cls, instance):
+        '''
+        Convert an sklearn model *instance* into a VoTE ensemble.
+        '''
+        conv = {
+            'CatBoostClassifier': _catboost_gb_to_dict,
+            'CatBoostRegressor': _catboost_gb_to_dict,
+        }
+        name = type(instance).__name__
+        if name not in conv:
+            raise NotImplementedError
+        
+        d = conv[name](instance)
+        return cls.from_string(json.dumps(d, cls=_NumPyJSONEncoder))
+    
+    @classmethod
+    def from_xgboost(cls, booster):
+        '''
+        Convert an xgboost *booster* into a VoTE ensemble.
+        '''
+        if hasattr(booster, 'get_booster'):
+            booster = booster.get_booster()
+
+        buf = _ffi.from_buffer(booster.save_raw())
+        ptr = _lib.vote_xgboost_load_blob(buf, len(buf))
+        
+        return cls(ptr)
+    
+    @property
+    def nb_inputs(self):
+        '''
+        The number of input scalars accepted by this ensemble.
+        '''
+        return self.ptr.nb_inputs
+
+    @property
+    def nb_outputs(self):
+        '''
+        The number of output scalars emited by this ensemble.
+        '''
+        return self.ptr.nb_outputs
+
+    @property
+    def nb_trees(self):
+        '''
+        The number of trees in this ensemble.
+        '''
+        return self.ptr.nb_trees
+
+    @property
+    def nb_nodes(self):
+        '''
+        The number of nodes in this ensemble.
+        '''
+        return self.ptr.nb_nodes
+
+    @property
+    def post_processing_algorithm(self):
+        '''
+        The post processing algorithm applied.
+        '''
+        tbl = ('none', 'divisor', 'softmax', 'sigmoid')
+        return tbl[self.ptr.post_process]
+
+    def feature_usage(self, domain=None):
+        '''
+        The number of times each feature splits an input region into smaller
+        pieces.
+        '''
+        feature_usage = _ffi.new('size_t[%d]' % self.nb_inputs)
+        bounds = _mk_bounds(self.nb_inputs, domain)
+        _lib.vote_ensemble_feature_usage(self.ptr, bounds, feature_usage)
+        return list(feature_usage)
+    
+    def eval(self, *args):
+        '''
+        Evaluate this ensemble on a concrete sample.
+        '''
+        inputs = _ffi.new('real_t[%d]' % self.nb_inputs, args)
+        outputs = _ffi.new('real_t[%d]' % self.nb_outputs)
+
+        _lib.vote_ensemble_eval(self.ptr, inputs, outputs)
+        return list(outputs)
+
+    def forall(self, callback, domain=None):
+        '''
+        Enumerate all precise mappings of this ensemble for some input *domain*
+        until the *callback* function returns FAIL, or all mappings
+        have been enumerated.
+
+        Returns true if all mappings PASS the callback function, or
+        false if any of the mappings FAIL the callback function.
+        '''
+        bounds = _mk_bounds(self.nb_inputs, domain)
+        ctx = _ffi.new_handle(callback)
+        cb = _lib._vote_mapping_python_cb
+        return _lib.vote_ensemble_forall(self.ptr, bounds, cb, ctx)
+
+    def absref(self, callback, domain=None):
+        '''
+        Enumerate abstract mappings of this ensemble using an 
+        abstraction-refinement approach for some input *domain*.
+
+        Returns true if all conclusive mappings PASS the callback function, or
+        false if any of the conclusive mappings FAIL the callback function.
+        '''
+        bounds = _mk_bounds(self.nb_inputs, domain)
+        ctx = _ffi.new_handle(callback)
+        cb = _lib._vote_mapping_python_cb
+        return _lib.vote_ensemble_absref(self.ptr, bounds, cb, ctx)
+
+    def approximate(self, domain=None):
+        '''
+        Approximate a pessimistic and sound mapping for a given input *domain*.
+        '''
+        bounds = _mk_bounds(self.nb_inputs, domain)
+        ptr = _lib.vote_ensemble_approximate(self.ptr, bounds)
+        return _ffi.gc(ptr, _lib.vote_mapping_del)
+
+    def explain_is_valid(self, inputs, expl, counter_example=None):
+        xvec = _ffi.new('real_t[%d]' % self.nb_inputs, list(inputs))
+        evec = _ffi.new('bool[%d]' % self.nb_inputs, [False] * self.nb_inputs)
+        coex = _ffi.new('real_t[%d]' % self.nb_inputs)
+
+        for ind in expl:
+            evec[ind] = True
+
+        if _lib.vote_explain_is_valid(self.ptr, xvec, evec, coex):
+            return True
+
+        if counter_example is None:
+            return False
+
+        if len(counter_example) == 0:
+            counter_example.extend(coex)
+            return False
+
+        assert(len(counter_example) == len(coex))
+        for dim in range(self.nb_inputs):
+            counter_example[dim] = coex[dim]
+
+        return False
+
+    def explain_minimal(self, inputs):
+        '''
+        Compute a minimal explanation from the given input point.
+        '''
+        inputs = _ffi.new('real_t[%d]' % self.nb_inputs, list(inputs))
+        expl = _ffi.new('bool[%d]' % self.nb_inputs)
+        _lib.vote_explain_minimal(self.ptr, inputs, expl)
+        return [ind for ind in range(self.nb_inputs) if expl[ind]]
+
+    def explain_minimum(self, inputs, feature_costs=None):
+        '''
+        Compute a minimum explanation from the given input point.
+        '''
+        feature_costs = list(feature_costs or ([1] * self.nb_inputs))
+        assert min(feature_costs) >= 0
+        feature_costs = _ffi.new('real_t[%d]' % self.nb_inputs, list(feature_costs))
+        inputs = _ffi.new('real_t[%d]' % self.nb_inputs, list(inputs))
+        expl = _ffi.new('bool[%d]' % self.nb_inputs)
+        ptr = _lib.vote_explain_minimum(self.ptr, inputs, feature_costs, expl)
+        return [ind for ind in range(self.nb_inputs) if expl[ind]]
+
+    def explain_forall(self, inputs, callback):
+        inputs = _ffi.new('real_t[%d]' % self.nb_inputs, list(inputs))
+        ctx = _ffi.new_handle(callback)
+        cb = _lib._vote_explain_python_cb
+        _lib.vote_explain_forall(self.ptr, inputs, cb, ctx)
+    
+    def serialize(self):
+        '''
+        Serialize the ensemble into a JSON-formatted string.
+        '''
+        ptr = _lib.vote_ensemble_save_string(self.ptr)
+        s = _ffi.string(ptr)
+        _lib.free(ptr)
+        
+        return s.decode('utf-8')
+    

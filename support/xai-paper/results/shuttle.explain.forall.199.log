@@ -1,0 +1,12 @@
+explain:dataset:    inputs/shuttle.csv
+explain:instance:   199
+explain:timeout:    3600s
+explain:type:       enumeration (MARCO)
+explain:nb_inputs:  9
+explain:nb_outputs: 7
+explain:nb_trees:   350
+explain:nb_nodes:   2066
+explain:outcome:    5 explanations
+explain:runtime:    0.06s
+explain:querytime:  0.06s
+explain:queries:    70

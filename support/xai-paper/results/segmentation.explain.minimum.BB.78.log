@@ -1,0 +1,12 @@
+explain:dataset:    inputs/segmentation.csv
+explain:instance:   78
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  19
+explain:nb_outputs: 7
+explain:nb_trees:   350
+explain:nb_nodes:   1550
+explain:outcome:    timeout
+explain:runtime:    3588.30s
+explain:querytime:  3576.99s
+explain:queries:    10008029

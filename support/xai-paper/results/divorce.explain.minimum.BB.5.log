@@ -1,0 +1,12 @@
+explain:dataset:    inputs/divorce.csv
+explain:instance:   5
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  54
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   118
+explain:outcome:    |{17, 18, 25, 39}| = 4
+explain:runtime:    0.08s
+explain:querytime:  0.07s
+explain:queries:    7593

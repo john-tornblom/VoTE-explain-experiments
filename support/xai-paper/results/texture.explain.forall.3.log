@@ -1,0 +1,12 @@
+explain:dataset:    inputs/texture.csv
+explain:instance:   3
+explain:timeout:    3600s
+explain:type:       enumeration (MARCO)
+explain:nb_inputs:  40
+explain:nb_outputs: 11
+explain:nb_trees:   550
+explain:nb_nodes:   5630
+explain:outcome:    5045 explanations
+explain:runtime:    726.66s
+explain:querytime:  726.34s
+explain:queries:    148819

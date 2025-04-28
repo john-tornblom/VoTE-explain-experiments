@@ -1,0 +1,8 @@
+explain:model:    inputs/pendigits.json
+explain:dataset:  inputs/pendigits.csv
+explain:instance: 54
+explain:timeout:  3600
+explain:outcome:  [0, 1, 2, 3, 4, 8, 9, 10, 13, 14, 15] (11)
+explain:queries:  659
+explain:runtime:  1.8233389999999998
+explain:seeds:    66

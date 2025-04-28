@@ -1,0 +1,12 @@
+explain:dataset:    inputs/zoo.csv
+explain:instance:   39
+explain:timeout:    3600s
+explain:type:       enumeration (MARCO)
+explain:nb_inputs:  16
+explain:nb_outputs: 7
+explain:nb_trees:   350
+explain:nb_nodes:   906
+explain:outcome:    10 explanations
+explain:runtime:    0.02s
+explain:querytime:  0.02s
+explain:queries:    194

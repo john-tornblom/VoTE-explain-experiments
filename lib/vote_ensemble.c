@@ -1,0 +1,365 @@
+/* Copyright (C) 2019 John Törnblom
+
+   This file is part of VoTE (Verifier of Tree Ensembles).
+
+VoTE is free software: you can redistribute it and/or modify it under
+the terms of the GNU Lesser General Public License as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any
+later version.
+
+VoTE is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License
+for more details.
+
+You should have received a copy of the GNU Lesser General Public
+License along with VoTE; see the files COPYING and COPYING.LESSER. If not,
+see <http://www.gnu.org/licenses/>.  */
+
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
+#include <limits.h>
+
+#include "parson.h"
+
+#include "vote.h"
+#include "vote_math.h"
+#include "vote_tree.h"
+#include "vote_pipeline.h"
+#include "vote_refinary.h"
+#include "vote_abstract.h"
+#include "vote_postproc.h"
+
+
+
+/**
+ * Create a one-vs-all ensemble for a given label.
+ **/
+static vote_ensemble_t*
+vote_ensemble_one_vs_all(const vote_ensemble_t *e, size_t label) {
+  vote_ensemble_t *el = calloc(1, sizeof(vote_ensemble_t));
+  assert(el);
+
+  el->nb_inputs    = e->nb_inputs;
+  el->nb_outputs   = 1;
+  el->nb_trees     = e->nb_trees / e->nb_outputs;
+  el->post_process = VOTE_POST_PROCESS_NONE;
+  el->trees        = calloc(el->nb_trees, sizeof(vote_tree_t*));
+  assert(el->trees);
+
+  for(size_t i=0; i<el->nb_trees; i++) {
+    size_t offset = (i*e->nb_outputs) + label;
+    el->trees[i] = vote_tree_copy(e->trees[offset]);
+    el->trees[i]->nb_outputs = 1;
+
+    for(size_t j=0; j<el->trees[i]->nb_nodes; j++) {
+      el->trees[i]->value[j][0] = e->trees[offset]->value[j][label];
+    }
+    
+    el->nb_nodes += el->trees[i]->nb_nodes;
+  }
+  return el;
+}
+
+
+static struct json_value_t*
+vote_ensemble_encode(const vote_ensemble_t* e) {
+  struct json_value_t* root = json_value_init_object();
+  struct json_value_t* val = json_value_init_array();
+  struct json_array_t* array = json_value_get_array(val);
+  struct json_object_t* obj = json_value_get_object(root);
+
+  json_object_set_value(obj, "trees", val);
+  for(size_t i=0; i<e->nb_trees; i++) {
+    val = vote_tree_encode(e->trees[i]);
+    json_array_append_value(array, val);
+  }
+
+  switch(e->post_process) {
+  case VOTE_POST_PROCESS_NONE:
+    json_object_set_string(obj, "post_process", "none");
+    break;
+
+  case VOTE_POST_PROCESS_DIVISOR:
+    json_object_set_string(obj, "post_process", "divisor");
+    break;
+
+  case VOTE_POST_PROCESS_SOFTMAX:
+    json_object_set_string(obj, "post_process", "softmax");
+    break;
+
+  case VOTE_POST_PROCESS_SIGMOID:
+    json_object_set_string(obj, "post_process", "sigmoid");
+    break;
+  }
+
+  if(e->onevsall) {
+    json_object_set_boolean(obj, "onevsall", !!e->onevsall);
+  }
+  
+  return root;
+}
+
+
+static vote_ensemble_t*
+vote_ensemble_load(struct json_value_t *root) {
+  struct json_object_t *obj;
+  struct json_array_t *array;
+
+  assert(json_value_get_type(root) == JSONObject);
+  obj = json_value_get_object(root);
+  array = json_object_get_array(obj, "trees");
+  assert(array);
+  
+  vote_ensemble_t *e = calloc(1, sizeof(vote_ensemble_t));
+  assert(e);
+  
+  e->nb_trees = json_array_get_count(array);
+  e->trees = calloc(e->nb_trees, sizeof(vote_tree_t*));
+  assert(e->trees);
+  
+  for(size_t i=0; i<e->nb_trees; i++) {
+    struct json_value_t *val = json_array_get_value(array, i);
+    e->trees[i] = vote_tree_parse(val);
+
+    if(i == 0) {
+      e->nb_inputs = e->trees[i]->nb_inputs;
+      e->nb_outputs = e->trees[i]->nb_outputs;
+    } else {
+      assert(e->nb_inputs == e->trees[i]->nb_inputs);
+      assert(e->nb_outputs == e->trees[i]->nb_outputs);
+    }
+    e->nb_nodes += e->trees[i]->nb_nodes;
+  }
+
+  const char *post_process = json_object_get_string(obj, "post_process");
+  assert(post_process);
+  
+  if(!strcmp(post_process, "none")) {
+    e->post_process = VOTE_POST_PROCESS_NONE;
+  } else if(!strcmp(post_process, "divisor")) {
+    e->post_process = VOTE_POST_PROCESS_DIVISOR;
+  } else if(!strcmp(post_process, "softmax")) {
+    e->post_process = VOTE_POST_PROCESS_SOFTMAX;
+  } else if(!strcmp(post_process, "sigmoid")) {
+    e->post_process = VOTE_POST_PROCESS_SIGMOID;
+  } else {
+    assert(false && "unknown post-processing algorithm");
+  }
+
+  if(json_object_get_boolean(obj, "onevsall") > 0) {
+    e->onevsall = calloc(e->nb_outputs, sizeof(vote_ensemble_t*));
+    for(size_t i=0; i<e->nb_outputs; i++) {
+      e->onevsall[i] = vote_ensemble_one_vs_all(e, i);
+    }
+  }
+
+  vote_bound_t domain[e->nb_inputs];
+  for(size_t i=0; i<e->nb_inputs; i++) {
+    domain[i].lower = -VOTE_INFINITY;
+    domain[i].upper = VOTE_INFINITY;
+  }
+  e->feature_usage = calloc(e->nb_inputs, sizeof(size_t));
+  vote_ensemble_feature_usage(e, domain, e->feature_usage);
+  
+  return e;
+}
+
+
+vote_ensemble_t*
+vote_ensemble_load_file(const char *filename) {
+  struct json_value_t *root = json_parse_file(filename);
+  assert(root);
+
+  vote_ensemble_t* e = vote_ensemble_load(root);
+  json_value_free(root);
+  
+  return e;
+}
+
+
+bool
+vote_ensemble_save_file(const vote_ensemble_t *e, const char *filename) {
+  struct json_value_t *root = vote_ensemble_encode(e);
+  return json_serialize_to_file(root, filename) == JSONSuccess;
+}
+
+
+vote_ensemble_t*
+vote_ensemble_load_string(const char *string) {
+  struct json_value_t *root = json_parse_string(string);
+  assert(root);
+
+  vote_ensemble_t* e = vote_ensemble_load(root);
+  json_value_free(root);
+  
+  return e;
+}
+
+
+const char*
+vote_ensemble_save_string(const vote_ensemble_t *e) {
+  struct json_value_t *root = vote_ensemble_encode(e);
+  return json_serialize_to_string(root);
+}
+
+
+void
+vote_ensemble_del(vote_ensemble_t *e) {
+  for(size_t i=0; i<e->nb_outputs && e->onevsall; i++) {
+    vote_ensemble_del(e->onevsall[i]);
+  }
+  
+  for(size_t i=0; i<e->nb_trees; i++) {
+    vote_tree_del(e->trees[i]);
+  }
+
+  if(e->onevsall) {
+    free(e->onevsall);
+  }
+
+  free(e->feature_usage);
+  free(e->trees);
+  free(e);
+}
+
+
+bool
+vote_ensemble_forall(const vote_ensemble_t *e, const vote_bound_t *inputs,
+		     vote_mapping_cb_t *user_cb, void *user_ctx) {
+  vote_pipeline_t *head = vote_postproc_pipeline(e, user_ctx, user_cb);
+    
+  for(size_t i=0; i<e->nb_trees; i++) {
+    vote_pipeline_t *sink = head;
+    head = vote_refinary_pipeline(e->trees[e->nb_trees-i-1]);
+    vote_pipeline_connect(head, sink);
+  }    
+
+  vote_mapping_t *m = vote_mapping_new(e->nb_inputs, e->nb_outputs);
+  memcpy(m->inputs, inputs, e->nb_inputs * sizeof(vote_bound_t));
+  vote_outcome_t o = vote_pipeline_input(head, m);
+
+  vote_mapping_del(m);
+  vote_pipeline_del(head);
+
+  assert(o != VOTE_UNSURE);
+  
+  return o == VOTE_PASS;
+}
+
+
+vote_outcome_t
+vote_ensemble_absref(const vote_ensemble_t *e, const vote_bound_t *inputs,
+		     vote_mapping_cb_t *user_cb, void *user_ctx) {
+#if 1
+  return vote_absref_query(e, inputs, user_cb, user_ctx, NULL);
+#else
+  vote_pipeline_t *pp = vote_postproc_pipeline(e, user_ctx, user_cb);
+  vote_pipeline_t *head = NULL;
+  vote_pipeline_t *tail = NULL;
+  
+  for(size_t i=0; i<e->nb_trees; i++) {
+    vote_pipeline_t *abs = vote_abstract_pipeline(&e->trees[i], e->nb_trees - i, pp);
+    vote_pipeline_t *ref = vote_refinary_pipeline(e->trees[i]);
+    vote_pipeline_connect(abs, ref);
+    
+    if(tail) {
+      vote_pipeline_connect(tail, abs);
+    }
+    if(!head) {
+      head = abs;
+    }
+    
+    tail = ref;
+  }    
+
+  vote_pipeline_connect(tail, pp);
+  
+  vote_mapping_t *m = vote_mapping_new(e->nb_inputs, e->nb_outputs);
+  memcpy(m->inputs, inputs, e->nb_inputs * sizeof(vote_bound_t));
+  vote_outcome_t o = vote_pipeline_input(head, m);
+
+  vote_mapping_del(m);
+  vote_pipeline_del(head);
+  
+  return o;
+#endif
+}
+
+
+/**
+ * Copy the output from a precise mapping to a vector of scalars.
+ **/
+static vote_outcome_t
+vote_ensemble_copy_scalar_outputs(void *ctx, vote_mapping_t *m) {
+  real_t *outputs = ctx;
+
+  assert(vote_mapping_precise(m));
+  
+  for(size_t i=0; i<m->nb_outputs; i++) {
+    outputs[i] = m->outputs[i].lower;
+  }
+
+  return VOTE_PASS;
+}
+
+
+void
+vote_ensemble_eval(const vote_ensemble_t *e, const real_t *inputs, real_t *outputs) {
+  vote_bound_t input_region[e->nb_inputs];
+
+  for(size_t i=0; i<e->nb_inputs; i++) {
+    input_region[i].lower = inputs[i];
+    input_region[i].upper = inputs[i];
+  }
+  
+  for(size_t i=0; i<e->nb_outputs; i++) {
+    outputs[i] = VOTE_NAN;
+  }
+  
+  vote_ensemble_forall(e, input_region, vote_ensemble_copy_scalar_outputs, outputs);
+}
+
+
+/**
+ * Copy the output from one abstract mapping to another.
+ **/
+static vote_outcome_t
+vote_ensemble_copy_mapping_outputs(void *ctx, vote_mapping_t *source) {
+  vote_mapping_t *target = (vote_mapping_t*)ctx;
+
+  memcpy(target->outputs, source->outputs,
+	 source->nb_outputs * sizeof(vote_bound_t));
+  
+  return VOTE_PASS;
+}
+
+
+vote_mapping_t *
+vote_ensemble_approximate(const vote_ensemble_t *e, const vote_bound_t *inputs) {
+  vote_mapping_t *m = vote_mapping_new(e->nb_inputs, e->nb_outputs);
+  vote_pipeline_t *pp = vote_postproc_pipeline(e, m, vote_ensemble_copy_mapping_outputs);
+  vote_pipeline_t *a = vote_abstract_pipeline(e->trees, e->nb_trees, pp);
+
+  vote_pipeline_connect(a, pp);
+  memcpy(m->inputs, inputs, e->nb_inputs * sizeof(vote_bound_t));
+  vote_pipeline_input(a, m);
+  
+  vote_pipeline_del(a);
+  
+  return m;
+}
+
+
+void
+vote_ensemble_feature_usage(const vote_ensemble_t* e,
+			    const vote_bound_t *input_region,
+			    size_t *feature_usage) {
+  memset(feature_usage, 0, e->nb_inputs * sizeof(size_t));
+  
+  for(size_t i=0; i<e->nb_trees; i++) {
+    vote_tree_feature_usage(e->trees[i], input_region, feature_usage);
+  }
+}
+

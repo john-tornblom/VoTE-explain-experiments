@@ -1,0 +1,8 @@
+explain:model:    inputs/zoo.json
+explain:dataset:  inputs/zoo.csv
+explain:instance: 30
+explain:timeout:  3600
+explain:outcome:  [1, 3, 6, 8, 9, 11] (6)
+explain:queries:  79
+explain:runtime:  0.008833000000000008
+explain:seeds:    9

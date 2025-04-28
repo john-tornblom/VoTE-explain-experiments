@@ -1,0 +1,12 @@
+explain:dataset:    inputs/twonorm.csv
+explain:instance:   182
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  20
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   742
+explain:outcome:    timeout
+explain:runtime:    3589.00s
+explain:querytime:  3507.34s
+explain:queries:    68199425

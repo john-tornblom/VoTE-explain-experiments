@@ -1,0 +1,8 @@
+explain:model:    inputs/spambase.json
+explain:dataset:  inputs/spambase.csv
+explain:instance: 137
+explain:timeout:  3600
+explain:outcome:  [11, 15, 16, 17, 18, 24, 25, 26, 32, 34, 36, 38, 40, 41, 42, 43, 45, 47, 48, 51, 54, 55] (22)
+explain:queries:  12559
+explain:runtime:  2.799529
+explain:seeds:    377

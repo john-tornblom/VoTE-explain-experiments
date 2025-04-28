@@ -1,0 +1,8 @@
+explain:model:    inputs/texture.json
+explain:dataset:  inputs/texture.csv
+explain:instance: 179
+explain:timeout:  3600
+explain:outcome:  [2, 3, 5, 9, 22, 25, 31, 32] (8)
+explain:queries:  2593
+explain:runtime:  3.332718
+explain:seeds:    1238

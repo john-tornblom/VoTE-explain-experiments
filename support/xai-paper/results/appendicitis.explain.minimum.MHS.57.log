@@ -1,0 +1,8 @@
+explain:model:    inputs/appendicitis.json
+explain:dataset:  inputs/appendicitis.csv
+explain:instance: 57
+explain:timeout:  3600
+explain:outcome:  [0, 2, 5, 6] (4)
+explain:queries:  41
+explain:runtime:  0.0038839999999999986
+explain:seeds:    7

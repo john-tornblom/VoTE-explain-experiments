@@ -1,0 +1,10 @@
+explain:dataset:    inputs/pendigits.csv
+explain:instance:   150
+explain:timeout:    3600s
+explain:type:       minimal (deletion filter)
+explain:nb_inputs:  16
+explain:nb_outputs: 10
+explain:nb_trees:   500
+explain:nb_nodes:   6590
+explain:outcome:    {1, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15}
+explain:runtime:    0.05s

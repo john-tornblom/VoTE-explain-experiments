@@ -1,0 +1,12 @@
+explain:dataset:    inputs/wdbc.csv
+explain:instance:   31
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  30
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   462
+explain:outcome:    |{1, 13, 21, 22, 23}| = 5
+explain:runtime:    56.97s
+explain:querytime:  55.47s
+explain:queries:    1287821

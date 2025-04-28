@@ -1,0 +1,8 @@
+explain:model:    inputs/ionosphere.json
+explain:dataset:  inputs/ionosphere.csv
+explain:instance: 4
+explain:timeout:  3600
+explain:outcome:  [4, 5, 7, 15, 21, 26] (6)
+explain:queries:  11352
+explain:runtime:  1.0700049999999999
+explain:seeds:    419

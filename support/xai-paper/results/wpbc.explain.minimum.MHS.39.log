@@ -1,0 +1,8 @@
+explain:model:    inputs/wpbc.json
+explain:dataset:  inputs/wpbc.csv
+explain:instance: 39
+explain:timeout:  3600
+explain:outcome:  [0, 2, 6, 12, 13, 20, 25] (7)
+explain:queries:  20783
+explain:runtime:  2.8057220000000003
+explain:seeds:    728

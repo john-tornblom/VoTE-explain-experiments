@@ -1,0 +1,12 @@
+explain:dataset:    inputs/wpbc.csv
+explain:instance:   183
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  33
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   564
+explain:outcome:    |{2, 12, 15, 25, 32}| = 5
+explain:runtime:    365.97s
+explain:querytime:  361.71s
+explain:queries:    3462345

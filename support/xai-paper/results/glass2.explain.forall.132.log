@@ -1,0 +1,12 @@
+explain:dataset:    inputs/glass2.csv
+explain:instance:   132
+explain:timeout:    3600s
+explain:type:       enumeration (MARCO)
+explain:nb_inputs:  9
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   540
+explain:outcome:    7 explanations
+explain:runtime:    0.00s
+explain:querytime:  0.00s
+explain:queries:    94

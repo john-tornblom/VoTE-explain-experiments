@@ -1,0 +1,10 @@
+explain:dataset:    inputs/glass2.csv
+explain:instance:   68
+explain:timeout:    3600s
+explain:type:       minimal (deletion filter)
+explain:nb_inputs:  9
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   540
+explain:outcome:    {0, 2, 4, 5, 6}
+explain:runtime:    0.00s

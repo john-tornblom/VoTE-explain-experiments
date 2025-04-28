@@ -1,0 +1,55 @@
+#   Copyright (C) 2018 John Törnblom
+#
+# This file is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING. If not see
+# <http://www.gnu.org/licenses/>.
+
+AC_PREREQ([2.69])
+# Remember to sync version with bindings/python/build.py
+AC_INIT([libvote],[0.3.0],[john.tornblom@liu.se])
+AC_COPYRIGHT([GNU Lesser General Public License version 3 or later])
+AC_CONFIG_SRCDIR([configure.ac])
+AC_CONFIG_MACRO_DIRS([m4])
+AC_USE_SYSTEM_EXTENSIONS
+
+# Checks for programs.
+AC_PROG_CC
+AC_PROG_CXX
+AC_PROG_INSTALL
+
+# Checks for header files.
+AC_CHECK_HEADERS([stddef.h math.h])
+AC_HEADER_ASSERT
+AC_HEADER_STDBOOL
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_TYPE_SIZE_T
+
+# Checks for library functions.
+AC_CHECK_FUNCS([strstr])
+AC_FUNC_MALLOC
+AC_FUNC_MEMCMP
+
+AM_INIT_AUTOMAKE([foreign subdir-objects])
+LT_INIT
+
+# Checks for optional python bindings deps
+AM_PATH_PYTHON([3],, [:])
+AX_PYTHON_MODULE([cffi])
+AM_CONDITIONAL([HAVE_PYMOD_CFFI], [test "$HAVE_PYMOD_CFFI" = yes])
+
+LT_INIT([win32-dll])
+
+AC_CONFIG_FILES([Makefile ext/Makefile lib/Makefile inc/Makefile src/Makefile
+          examples/Makefile bindings/python/Makefile])
+AC_OUTPUT

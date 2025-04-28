@@ -1,0 +1,12 @@
+explain:dataset:    inputs/wine-recognition.csv
+explain:instance:   34
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  13
+explain:nb_outputs: 3
+explain:nb_trees:   150
+explain:nb_nodes:   600
+explain:outcome:    |{0, 9}| = 2
+explain:runtime:    0.01s
+explain:querytime:  0.01s
+explain:queries:    48

@@ -1,0 +1,12 @@
+explain:dataset:    inputs/ionosphere.csv
+explain:instance:   101
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  34
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   464
+explain:outcome:    |{2, 4, 25}| = 3
+explain:runtime:    0.11s
+explain:querytime:  0.11s
+explain:queries:    1020

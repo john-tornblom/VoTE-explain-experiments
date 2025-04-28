@@ -1,0 +1,8 @@
+explain:model:    inputs/biodegradation.json
+explain:dataset:  inputs/biodegradation.csv
+explain:instance: 51
+explain:timeout:  3600
+explain:outcome:  [0, 1, 5, 7, 8, 10, 11, 15, 21, 26, 29, 30, 31, 32, 33, 35, 37, 38, 40] (19)
+explain:queries:  1009821
+explain:runtime:  132.077538
+explain:seeds:    51872

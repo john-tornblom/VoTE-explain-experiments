@@ -1,0 +1,8 @@
+explain:model:    inputs/divorce.json
+explain:dataset:  inputs/divorce.csv
+explain:instance: 90
+explain:timeout:  3600
+explain:outcome:  [17, 25, 35, 39] (4)
+explain:queries:  187
+explain:runtime:  0.006739999999999996
+explain:seeds:    19

@@ -1,0 +1,12 @@
+explain:dataset:    inputs/shuttle.csv
+explain:instance:   51
+explain:timeout:    3600s
+explain:type:       minimum (BB)
+explain:nb_inputs:  9
+explain:nb_outputs: 7
+explain:nb_trees:   350
+explain:nb_nodes:   2066
+explain:outcome:    |{0, 1, 6, 8}| = 4
+explain:runtime:    0.76s
+explain:querytime:  0.76s
+explain:queries:    656

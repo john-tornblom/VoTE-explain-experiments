@@ -1,0 +1,10 @@
+explain:dataset:    inputs/vowel.csv
+explain:instance:   71
+explain:timeout:    3600s
+explain:type:       minimal (deletion filter)
+explain:nb_inputs:  13
+explain:nb_outputs: 11
+explain:nb_trees:   550
+explain:nb_nodes:   7534
+explain:outcome:    {3, 5, 6, 7, 8, 9, 11, 12}
+explain:runtime:    0.03s

@@ -1,0 +1,8 @@
+explain:model:    inputs/ann-thyroid.json
+explain:dataset:  inputs/ann-thyroid.csv
+explain:instance: 1
+explain:timeout:  3600
+explain:outcome:  [16] (1)
+explain:queries:  13
+explain:runtime:  0.025223000000000023
+explain:seeds:    3

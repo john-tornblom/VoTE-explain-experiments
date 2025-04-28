@@ -1,0 +1,10 @@
+explain:dataset:    inputs/spambase.csv
+explain:instance:   94
+explain:timeout:    3600s
+explain:type:       minimal (deletion filter)
+explain:nb_inputs:  57
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   948
+explain:outcome:    {11, 23, 24, 25, 26, 28, 32, 34, 36, 38, 40, 41, 42, 43, 45, 47, 48, 49, 52, 53, 55, 56}
+explain:runtime:    0.04s

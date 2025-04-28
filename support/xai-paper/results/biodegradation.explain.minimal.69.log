@@ -1,0 +1,10 @@
+explain:dataset:    inputs/biodegradation.csv
+explain:instance:   69
+explain:timeout:    3600s
+explain:type:       minimal (deletion filter)
+explain:nb_inputs:  41
+explain:nb_outputs: 1
+explain:nb_trees:   50
+explain:nb_nodes:   646
+explain:outcome:    {2, 4, 5, 6, 7, 8, 10, 11, 13, 14, 15, 17, 19, 21, 24, 26, 29, 30, 31, 32, 35, 36, 37, 38, 40}
+explain:runtime:    0.00s
